@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 
 export const sendEthereum = async (
-   setError: (err: any) => void,
+   setMessage: (err: any) => void,
    address: string,
    amount: number
 ) => {
@@ -13,15 +13,20 @@ export const sendEthereum = async (
          const accounts = await web3.eth.getAccounts();
          const account = accounts[0];
          // if user has logged in, perform the transaction
-         web3.eth.sendTransaction({
-            from: account,
-            to: address,
-            value: Web3.utils.toWei(amount.toString(), 'ether'),
-         });
+         await web3.eth
+            .sendTransaction({
+               from: account,
+               to: address,
+               value: Web3.utils.toWei(amount.toString(), 'ether'),
+            })
+            .then(() =>
+               setMessage({ message: 'Transaction succesfully', error: false })
+            )
+            .catch(err => setMessage({ ...err, error: true }));
       } else {
-         setError({ message: 'No crypto wallet. Install it' });
+         setMessage({ message: 'No crypto wallet. Install it', error: true });
       }
-   } catch (error) {
-      setError(error);
+   } catch (err) {
+      setMessage({ message: 'User rejected the request', error: true });
    }
 };

@@ -7,15 +7,14 @@ import { sendEthereum } from '../../assets/payment';
 interface FormProps {
    amount: number;
    recipientAddress: string;
-   setRecipientAddress: (e: string) => void;
    setAmount: React.Dispatch<React.SetStateAction<number>>;
+   setRecipientAddress: (e: string) => void;
    handleSendEthereum?: () => void;
 }
 
 const Form: FunctionComponent<FormProps> = ({
    amount,
    recipientAddress,
-
    setRecipientAddress,
    setAmount,
 }) => {

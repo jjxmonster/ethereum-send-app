@@ -1,5 +1,7 @@
 import { render, screen, fireEvent } from './text-utils';
+import { waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import * as React from 'react';
 
 import Form from '../components/Form';
 import * as payment from '../assets/payment';
@@ -33,7 +35,7 @@ describe('Form render', () => {
    });
 });
 
-describe('messages appear after validation', () => {
+describe('form validation', () => {
    it('should show address error message when user click send button with invalid address', () => {
       render(
          <Form
@@ -99,5 +101,67 @@ describe('messages appear after validation', () => {
          })
       );
       expect(sendEthereum).toHaveBeenCalled();
+   });
+});
+
+describe('sendEthereum function', () => {
+   beforeEach(() => {
+      render(
+         <Form
+            amount={5}
+            recipientAddress='0x6922d24fa3Ea25C78f721C3B7678a5aF00db219F'
+            setRecipientAddress={() => {}}
+            setAmount={() => {}}
+         />
+      );
+   });
+   it('should return error when user dont have wallet installed', () => {
+      fireEvent(
+         screen.getByTestId('button-send'),
+         new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+         })
+      );
+      // default in test window.ethereum is undefined
+      expect(screen.getByTestId('error-message-paragraph')).toHaveTextContent(
+         'No crypto wallet. Install it'
+      );
+   });
+   it('should ask user to connect wallet if is installed', () => {
+      delete window.ethereum;
+      window.ethereum = {};
+      window.ethereum.send = jest.fn();
+
+      fireEvent(
+         screen.getByTestId('button-send'),
+         new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+         })
+      );
+
+      expect(window.ethereum.send).toHaveBeenCalled();
+   });
+   it('should return error if user reject wallet connection', async () => {
+      delete window.ethereum;
+      window.ethereum = {};
+      window.ethereum.send = jest.fn();
+
+      jest
+         .spyOn(window.ethereum, 'send')
+         .mockImplementation(() => Promise.reject());
+
+      fireEvent(
+         screen.getByTestId('button-send'),
+         new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+         })
+      );
+      const errorParagraph = await waitFor(() =>
+         screen.getByTestId('error-message-paragraph')
+      );
+      expect(errorParagraph).toHaveTextContent('User rejected the request');
    });
 });

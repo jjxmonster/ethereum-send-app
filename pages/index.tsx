@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Head from 'next/head';
+import Web3 from 'web3';
 import type { NextPage } from 'next';
 
 import Form from '../components/Form';
-import Head from 'next/head';
 
 export type MessageState = {
    code?: number;
@@ -14,6 +15,13 @@ export type MessageState = {
 const Home: NextPage = () => {
    const [recipientAddress, setRecipientAddress] = useState<string>('');
    const [amount, setAmount] = useState<number>(0);
+   const [provider, setProvider] = useState<Web3>();
+
+   useEffect(() => {
+      if (window !== undefined) {
+         setProvider(new Web3(window.ethereum));
+      }
+   }, []);
 
    return (
       <>
@@ -27,6 +35,7 @@ const Home: NextPage = () => {
                   recipientAddress={recipientAddress}
                   setRecipientAddress={setRecipientAddress}
                   setAmount={setAmount}
+                  provider={provider}
                />
             </div>
          </div>

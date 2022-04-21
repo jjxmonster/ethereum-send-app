@@ -10,6 +10,7 @@ interface FormProps {
    setAmount: React.Dispatch<React.SetStateAction<number>>;
    setRecipientAddress: (e: string) => void;
    handleSendEthereum?: () => void;
+   provider: Web3 | undefined;
 }
 
 const Form: FunctionComponent<FormProps> = ({
@@ -17,6 +18,7 @@ const Form: FunctionComponent<FormProps> = ({
    recipientAddress,
    setRecipientAddress,
    setAmount,
+   provider,
 }) => {
    const [message, setMessage] = useState<MessageState | null>(null);
 
@@ -24,7 +26,8 @@ const Form: FunctionComponent<FormProps> = ({
       if (amount > 0) {
          if (Web3.utils.isAddress(recipientAddress)) {
             setMessage({ message: '', error: false });
-            sendEthereum(setMessage, recipientAddress, amount);
+            provider &&
+               sendEthereum(setMessage, recipientAddress, amount, provider);
          } else {
             setMessage({
                message: 'Something is wrong with recipient address',
